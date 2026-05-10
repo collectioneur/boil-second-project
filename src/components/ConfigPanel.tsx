@@ -5,50 +5,64 @@ interface ConfigPanelProps {
   onChangeN: (val: number) => void;
 }
 
-export function ConfigPanel({ m, n, onChangeM, onChangeN }: ConfigPanelProps) {
+function ChevronDown() {
   return (
-    <div className="bg-white rounded-xl shadow p-4 md:p-6 border border-gray-200">
-      <h2 className="text-lg font-semibold text-slate-700 mb-4">
-        Rozmiar zadania
-      </h2>
-      <div className="flex flex-col sm:flex-row gap-6">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-slate-600 mb-2">
-            Dostawcy (m): <span className="font-bold text-slate-800">{m}</span>
-          </label>
-          <input
-            type="range"
-            min={1}
-            max={10}
-            value={m}
-            onChange={(e) => onChangeM(Number(e.target.value))}
-            className="w-full accent-slate-600"
-          />
-          <div className="flex justify-between text-xs text-slate-400 mt-1">
-            <span>1</span>
-            <span>5</span>
-            <span>10</span>
-          </div>
-        </div>
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-slate-600 mb-2">
-            Odbiorcy (n): <span className="font-bold text-slate-800">{n}</span>
-          </label>
-          <input
-            type="range"
-            min={1}
-            max={10}
-            value={n}
-            onChange={(e) => onChangeN(Number(e.target.value))}
-            className="w-full accent-slate-600"
-          />
-          <div className="flex justify-between text-xs text-slate-400 mt-1">
-            <span>1</span>
-            <span>5</span>
-            <span>10</span>
-          </div>
-        </div>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      aria-hidden="true"
+    >
+      <path d="M2 4.5l5 5 5-5" />
+    </svg>
+  );
+}
+
+function SelectRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-black">
+      <span className="text-[18px]">{label}</span>
+      <div className="relative flex items-center gap-2">
+        <select
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="text-[18px] font-medium bg-transparent border-none outline-none cursor-pointer pr-6"
+        >
+          {Array.from({ length: 10 }, (_, i) => (
+            <option key={i + 1} value={i + 1}>
+              {i + 1}
+            </option>
+          ))}
+        </select>
+        <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2">
+          <ChevronDown />
+        </span>
       </div>
     </div>
+  );
+}
+
+export function ConfigPanel({ m, n, onChangeM, onChangeN }: ConfigPanelProps) {
+  return (
+    <section className="px-16 py-6">
+      <div className="flex items-start justify-between gap-8">
+        <h2 className="text-[24px] font-medium pt-3">Ustawienia zadania</h2>
+        <div className="flex-1 max-w-xs">
+          <SelectRow label="Dostawcy (m):" value={m} onChange={onChangeM} />
+          <SelectRow label="Odbiorcy (n):" value={n} onChange={onChangeN} />
+        </div>
+      </div>
+    </section>
   );
 }

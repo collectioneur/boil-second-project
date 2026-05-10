@@ -25,6 +25,8 @@ function resize2D<T>(arr: T[][], rows: number, cols: number, fill: T): T[][] {
   );
 }
 
+const Divider = () => <div className="border-t border-black mx-16" />;
+
 export default function App() {
   const [m, setM] = useState(3);
   const [n, setN] = useState(3);
@@ -116,30 +118,36 @@ export default function App() {
   }, [m, n, suppliers, receivers, transportCosts, blockedRoutes]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white text-black">
       <Header />
-      <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-        <ConfigPanel m={m} n={n} onChangeM={handleChangeM} onChangeN={handleChangeN} />
-        <DataInputForm
-          m={m}
-          n={n}
-          suppliers={suppliers}
-          receivers={receivers}
-          transportCosts={transportCosts}
-          blockedRoutes={blockedRoutes}
-          onSupplierChange={handleSupplierChange}
-          onReceiverChange={handleReceiverChange}
-          onTransportCostChange={handleTransportCostChange}
-          onToggleBlock={handleToggleBlock}
-        />
-        <AlgorithmRunner onSolve={handleSolve} />
-        <ResultsViewer
-          iterations={iterations}
-          currentStep={currentStep}
-          onStepChange={setCurrentStep}
-          error={error}
-        />
-      </main>
+      <Divider />
+      <ConfigPanel m={m} n={n} onChangeM={handleChangeM} onChangeN={handleChangeN} />
+      <Divider />
+      <DataInputForm
+        m={m}
+        n={n}
+        suppliers={suppliers}
+        receivers={receivers}
+        transportCosts={transportCosts}
+        blockedRoutes={blockedRoutes}
+        onSupplierChange={handleSupplierChange}
+        onReceiverChange={handleReceiverChange}
+        onTransportCostChange={handleTransportCostChange}
+        onToggleBlock={handleToggleBlock}
+      />
+      <Divider />
+      <AlgorithmRunner onSolve={handleSolve} />
+      {(iterations.length > 0 || error) && (
+        <>
+          <Divider />
+          <ResultsViewer
+            iterations={iterations}
+            currentStep={currentStep}
+            onStepChange={setCurrentStep}
+            error={error}
+          />
+        </>
+      )}
     </div>
   );
 }

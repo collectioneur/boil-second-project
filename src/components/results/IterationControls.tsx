@@ -12,25 +12,25 @@ export function IterationControls({
   onNext,
 }: IterationControlsProps) {
   return (
-    <div className="flex items-center justify-center gap-4">
+    <div className="flex items-center justify-between border-b border-black pb-4 mb-6">
       <button
         onClick={onPrev}
         disabled={currentStep <= 0}
-        className="px-4 py-2 rounded-lg bg-slate-200 text-slate-700 font-medium
-          hover:bg-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="text-[18px] font-medium hover:opacity-50 transition-opacity
+          disabled:opacity-20 disabled:cursor-not-allowed"
       >
-        ◀ Wstecz
+        ← Wstecz
       </button>
-      <span className="text-sm font-medium text-slate-600 min-w-[120px] text-center">
+      <span className="text-[18px] font-medium">
         Iteracja {currentStep + 1} / {totalSteps}
       </span>
       <button
         onClick={onNext}
         disabled={currentStep >= totalSteps - 1}
-        className="px-4 py-2 rounded-lg bg-slate-200 text-slate-700 font-medium
-          hover:bg-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="text-[18px] font-medium hover:opacity-50 transition-opacity
+          disabled:opacity-20 disabled:cursor-not-allowed"
       >
-        Dalej ▶
+        Dalej →
       </button>
     </div>
   );

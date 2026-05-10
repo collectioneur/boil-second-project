@@ -32,40 +32,42 @@ export function TransportTable({ snapshot }: TransportTableProps) {
 
   const selectedKey = selectedCell ? cellKey(selectedCell[0], selectedCell[1]) : null;
 
-  function getCellClasses(i: number, j: number): string {
+  function getCellBg(i: number, j: number): string {
     const key = cellKey(i, j);
     const isBlocked = profitMatrix[i][j] === -Infinity;
     const isBasic = allocation[i][j] !== null;
     const isSelected = key === selectedKey;
     const inCycle = cycleMap.has(key);
 
-    if (isBlocked) return 'bg-gray-200 text-gray-400';
-    if (isSelected) return 'bg-green-100 ring-2 ring-green-500 ring-inset';
-    if (inCycle) return 'bg-amber-50 ring-2 ring-amber-500 ring-inset';
-    if (isBasic) return 'bg-blue-50';
+    if (isBlocked) return 'bg-[#F2F2F2]';
+    if (isSelected) return 'bg-[#F2F2F2] outline outline-2 outline-black outline-offset-[-2px]';
+    if (inCycle) return 'bg-[#F2F2F2] outline outline-2 outline-black outline-offset-[-2px] outline-dashed';
+    if (isBasic) return 'bg-[#F2F2F2]';
     return 'bg-white';
   }
 
+  const thBase = 'py-3 px-2 text-center text-[14px] font-medium border-b-2 border-black';
+  const tdBase = 'py-3 px-2 text-center border-b border-black relative';
+  const labelTd = 'py-3 px-2 text-left text-[14px] font-medium border-b border-black';
+
   return (
     <div className="overflow-x-auto">
-      <table className="border-collapse mx-auto text-sm">
+      <table className="w-full border-collapse border-t border-black">
         <thead>
           <tr>
-            <th className="p-2 border border-gray-300 bg-slate-100 text-xs text-slate-500" />
+            <th className={`${thBase} text-left w-12`} />
             {Array.from({ length: cols }, (_, j) => (
               <th
                 key={j}
-                className={`p-2 border border-gray-300 text-xs font-semibold min-w-[80px] ${
-                  isFictitious.cols[j]
-                    ? 'bg-yellow-50 text-yellow-700 italic'
-                    : 'bg-slate-100 text-slate-600'
+                className={`${thBase} min-w-[80px] ${
+                  isFictitious.cols[j] ? 'italic text-black/50' : ''
                 }`}
               >
                 {isFictitious.cols[j] ? 'FO' : `O${j + 1}`}
               </th>
             ))}
             {!isInitialPhase && (
-              <th className="p-2 border border-gray-300 bg-purple-50 text-xs font-semibold text-purple-600">
+              <th className={`${thBase} min-w-[60px]`}>
                 α<sub>i</sub>
               </th>
             )}
@@ -74,13 +76,7 @@ export function TransportTable({ snapshot }: TransportTableProps) {
         <tbody>
           {Array.from({ length: rows }, (_, i) => (
             <tr key={i}>
-              <td
-                className={`p-2 border border-gray-300 text-xs font-semibold ${
-                  isFictitious.rows[i]
-                    ? 'bg-yellow-50 text-yellow-700 italic'
-                    : 'bg-slate-100 text-slate-600'
-                }`}
-              >
+              <td className={`${labelTd} ${isFictitious.rows[i] ? 'italic text-black/50' : ''}`}>
                 {isFictitious.rows[i] ? 'FD' : `D${i + 1}`}
               </td>
               {Array.from({ length: cols }, (_, j) => {
@@ -92,37 +88,32 @@ export function TransportTable({ snapshot }: TransportTableProps) {
                 const cycleSign = cycleMap.get(key);
 
                 return (
-                  <td
-                    key={j}
-                    className={`p-1.5 border border-gray-300 relative ${getCellClasses(i, j)}`}
-                  >
+                  <td key={j} className={`${tdBase} ${getCellBg(i, j)}`}>
                     {isBlocked ? (
-                      <div className="text-center text-gray-400 text-lg">✕</div>
+                      <span className="text-black/25 text-[18px] font-light select-none">×</span>
                     ) : (
                       <div className="flex flex-col items-center gap-0.5">
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[11px] text-black/40 leading-none">
                           z={profit.toFixed(0)}
                         </span>
                         {alloc !== null ? (
-                          <span className="font-bold text-base text-slate-800">
+                          <span className="text-[18px] font-bold text-black leading-tight">
                             {alloc}
                           </span>
                         ) : d !== null && !isInitialPhase ? (
                           <span
-                            className={`text-xs font-medium ${
-                              d > 0 ? 'text-green-600' : 'text-red-500'
+                            className={`text-[13px] font-medium leading-tight ${
+                              d > 0 ? 'text-black font-bold' : 'text-black/40'
                             }`}
                           >
                             Δ={d.toFixed(2)}
                           </span>
                         ) : (
-                          <span className="text-slate-300 text-xs">—</span>
+                          <span className="text-black/20 text-[13px]">—</span>
                         )}
                         {cycleSign && (
                           <span
-                            className={`absolute top-0 right-1 text-xs font-bold ${
-                              cycleSign === '+' ? 'text-green-600' : 'text-red-600'
-                            }`}
+                            className="absolute top-1 right-1.5 text-[11px] font-bold text-black leading-none"
                           >
                             {cycleSign}
                           </span>
@@ -133,7 +124,7 @@ export function TransportTable({ snapshot }: TransportTableProps) {
                 );
               })}
               {!isInitialPhase && (
-                <td className="p-2 border border-gray-300 bg-purple-50 text-center text-xs font-mono text-purple-700">
+                <td className={`${tdBase} font-mono text-[14px] text-black/60`}>
                   {alpha[i] !== null ? alpha[i]!.toFixed(2) : '—'}
                 </td>
               )}
@@ -141,18 +132,15 @@ export function TransportTable({ snapshot }: TransportTableProps) {
           ))}
           {!isInitialPhase && (
             <tr>
-              <td className="p-2 border border-gray-300 bg-purple-50 text-xs font-semibold text-purple-600">
+              <td className={`${labelTd} font-medium`}>
                 β<sub>j</sub>
               </td>
               {Array.from({ length: cols }, (_, j) => (
-                <td
-                  key={j}
-                  className="p-2 border border-gray-300 bg-purple-50 text-center text-xs font-mono text-purple-700"
-                >
+                <td key={j} className={`${tdBase} font-mono text-[14px] text-black/60`}>
                   {beta[j] !== null ? beta[j]!.toFixed(2) : '—'}
                 </td>
               ))}
-              <td className="border border-gray-300 bg-gray-50" />
+              <td className={`${tdBase}`} />
             </tr>
           )}
         </tbody>

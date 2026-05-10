@@ -5,16 +5,25 @@ interface AlgorithmRunnerProps {
 
 export function AlgorithmRunner({ onSolve, disabled }: AlgorithmRunnerProps) {
   return (
-    <div className="flex justify-center">
+    <section className="px-16 py-6">
       <button
         onClick={onSolve}
         disabled={disabled}
-        className="px-8 py-3 rounded-xl bg-slate-800 text-white font-semibold text-lg
-          hover:bg-slate-700 active:bg-slate-900 transition-colors shadow-lg
-          disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-black text-white text-[18px] font-medium py-5
+          hover:bg-[#222] active:bg-[#444] transition-colors
+          disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{ borderRadius: 0 }}
       >
         Oblicz
       </button>
-    </div>
+      <button
+        onClick={onSolve}
+        disabled={disabled}
+        className="mt-4 text-[18px] text-black font-medium hover:opacity-60 transition-opacity
+          disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        Oblicz →
+      </button>
+    </section>
   );
 }
