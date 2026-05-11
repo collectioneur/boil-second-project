@@ -2,14 +2,19 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #ffffff;
   color: #000000;
 }
 
-/* Remove number input spinners */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -20,7 +25,6 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Remove select default arrow on some browsers */
 select {
   -webkit-appearance: none;
   -moz-appearance: none;

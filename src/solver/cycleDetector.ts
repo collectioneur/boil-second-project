@@ -1,15 +1,8 @@
-/**
- * Finds a closed cycle (pętla zmian) starting from a given entering cell,
- * using only basic cells for turning points.
- *
- * The cycle alternates between horizontal and vertical moves.
- * Each turn must land on a basic cell. The path must return to the start.
- */
 export function findCycle(
   enteringCell: [number, number],
   allocation: (number | null)[][],
   rows: number,
-  cols: number
+  cols: number,
 ): [number, number][] | null {
   const [startR, startC] = enteringCell;
 
@@ -56,9 +49,7 @@ export function findCycle(
     return false;
   }
 
-  // Try starting horizontally first, then vertically
   if (dfs(true)) {
-    // Remove duplicate end point if present
     if (
       path.length > 1 &&
       path[0][0] === path[path.length - 1][0] &&

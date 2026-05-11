@@ -1,4 +1,5 @@
-import type { Supplier, Receiver } from '../solver/types';
+import { useState, useEffect, useRef } from "react";
+import type { Supplier, Receiver } from "../solver/types";
 
 interface DataInputFormProps {
   m: number;
@@ -7,8 +8,16 @@ interface DataInputFormProps {
   receivers: Receiver[];
   transportCosts: number[][];
   blockedRoutes: boolean[][];
-  onSupplierChange: (index: number, field: 'podaz' | 'kosztZakupu', value: number) => void;
-  onReceiverChange: (index: number, field: 'popyt' | 'cenaSprzedazy', value: number) => void;
+  onSupplierChange: (
+    index: number,
+    field: "podaz" | "kosztZakupu",
+    value: number,
+  ) => void;
+  onReceiverChange: (
+    index: number,
+    field: "popyt" | "cenaSprzedazy",
+    value: number,
+  ) => void;
   onTransportCostChange: (i: number, j: number, value: number) => void;
   onToggleBlock: (i: number, j: number) => void;
 }
@@ -24,14 +33,34 @@ function NumInput({
   disabled?: boolean;
   dim?: boolean;
 }) {
+  const [display, setDisplay] = useState(String(value));
+  const focusedRef = useRef(false);
+
+  useEffect(() => {
+    if (!focusedRef.current) {
+      setDisplay(String(value));
+    }
+  }, [value]);
+
   return (
     <input
       type="number"
-      value={value}
-      onChange={(e) => onChange(Number(e.target.value) || 0)}
+      value={display}
+      onFocus={() => {
+        focusedRef.current = true;
+      }}
+      onBlur={() => {
+        focusedRef.current = false;
+        setDisplay(String(value));
+      }}
+      onChange={(e) => {
+        const raw = e.target.value;
+        setDisplay(raw);
+        onChange(raw === "" ? 0 : Number(raw) || 0);
+      }}
       disabled={disabled}
       className={`w-12 text-center text-[18px] bg-transparent border-none outline-none focus:underline
-        ${dim ? 'text-black/30 line-through' : 'text-black'}
+        ${dim ? "text-black/30 line-through" : "text-black"}
         disabled:cursor-not-allowed`}
     />
   );
@@ -67,8 +96,8 @@ function LockIcon({ locked }: { locked: boolean }) {
   );
 }
 
-const cellBase = 'py-3 text-center border-b border-black';
-const cellMinW = 'min-w-[80px]';
+const cellBase = "py-3 text-center border-b border-black";
+const cellMinW = "min-w-[80px]";
 
 export function DataInputForm({
   m,
@@ -89,7 +118,9 @@ export function DataInputForm({
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className={`${cellBase} text-left text-[18px] font-medium w-16`} />
+              <th
+                className={`${cellBase} text-left text-[18px] font-medium w-16`}
+              />
               {receivers.slice(0, n).map((_, j) => (
                 <th
                   key={j}
@@ -98,10 +129,14 @@ export function DataInputForm({
                   O{j + 1}
                 </th>
               ))}
-              <th className={`${cellBase} ${cellMinW} text-[18px] font-medium border-b-2 border-black`}>
+              <th
+                className={`${cellBase} ${cellMinW} text-[18px] font-medium border-b-2 border-black`}
+              >
                 Podaż
               </th>
-              <th className={`${cellBase} ${cellMinW} text-[18px] font-medium border-b-2 border-black`}>
+              <th
+                className={`${cellBase} ${cellMinW} text-[18px] font-medium border-b-2 border-black`}
+              >
                 k<sub>z</sub>
               </th>
             </tr>
@@ -117,7 +152,7 @@ export function DataInputForm({
                   return (
                     <td
                       key={j}
-                      className={`${cellBase} ${cellMinW} ${blocked ? 'bg-[#F2F2F2]' : ''}`}
+                      className={`${cellBase} ${cellMinW} ${blocked ? "bg-[#F2F2F2]" : ""}`}
                     >
                       <div className="flex items-center justify-center gap-2">
                         <NumInput
@@ -130,10 +165,10 @@ export function DataInputForm({
                           onClick={() => onToggleBlock(i, j)}
                           className={`transition-opacity ${
                             blocked
-                              ? 'text-black opacity-80'
-                              : 'text-black opacity-25 hover:opacity-70'
+                              ? "text-black opacity-80"
+                              : "text-black opacity-25 hover:opacity-70"
                           }`}
-                          title={blocked ? 'Odblokuj trasę' : 'Zablokuj trasę'}
+                          title={blocked ? "Odblokuj trasę" : "Zablokuj trasę"}
                         >
                           <LockIcon locked={blocked} />
                         </button>
@@ -144,24 +179,26 @@ export function DataInputForm({
                 <td className={`${cellBase} ${cellMinW}`}>
                   <NumInput
                     value={sup.podaz}
-                    onChange={(v) => onSupplierChange(i, 'podaz', v)}
+                    onChange={(v) => onSupplierChange(i, "podaz", v)}
                   />
                 </td>
                 <td className={`${cellBase} ${cellMinW}`}>
                   <NumInput
                     value={sup.kosztZakupu}
-                    onChange={(v) => onSupplierChange(i, 'kosztZakupu', v)}
+                    onChange={(v) => onSupplierChange(i, "kosztZakupu", v)}
                   />
                 </td>
               </tr>
             ))}
             <tr className="hover:bg-[#F2F2F2] transition-colors">
-              <td className={`${cellBase} text-left text-[18px] font-medium`}>Popyt</td>
+              <td className={`${cellBase} text-left text-[18px] font-medium`}>
+                Popyt
+              </td>
               {receivers.slice(0, n).map((rec, j) => (
                 <td key={j} className={`${cellBase} ${cellMinW}`}>
                   <NumInput
                     value={rec.popyt}
-                    onChange={(v) => onReceiverChange(j, 'popyt', v)}
+                    onChange={(v) => onReceiverChange(j, "popyt", v)}
                   />
                 </td>
               ))}
@@ -175,7 +212,7 @@ export function DataInputForm({
                 <td key={j} className={`${cellBase} ${cellMinW}`}>
                   <NumInput
                     value={rec.cenaSprzedazy}
-                    onChange={(v) => onReceiverChange(j, 'cenaSprzedazy', v)}
+                    onChange={(v) => onReceiverChange(j, "cenaSprzedazy", v)}
                   />
                 </td>
               ))}
@@ -185,8 +222,8 @@ export function DataInputForm({
         </table>
       </div>
       <p className="text-[14px] text-black/40 mt-4">
-        k<sub>t</sub> — koszt transportu · k<sub>z</sub> — koszt zakupu ·
-        c — cena sprzedaży · Zysk: z = c − k<sub>z</sub> − k<sub>t</sub>
+        k<sub>t</sub> - koszt transportu · k<sub>z</sub> - koszt zakupu · c -
+        cena sprzedaży · Zysk: z = c − k<sub>z</sub> − k<sub>t</sub>
       </p>
     </section>
   );

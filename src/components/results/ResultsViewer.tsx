@@ -1,6 +1,6 @@
-import type { IterationSnapshot } from '../../solver/types';
-import { TransportTable } from './TransportTable';
-import { IterationControls } from './IterationControls';
+import type { IterationSnapshot } from "../../solver/types";
+import { TransportTable } from "./TransportTable";
+import { IterationControls } from "./IterationControls";
 
 interface ResultsViewerProps {
   iterations: IterationSnapshot[];
@@ -36,8 +36,8 @@ export function ResultsViewer({
         <h2 className="text-[24px] font-medium">Wyniki</h2>
         <div className="flex items-center gap-6 text-[14px] text-black/50">
           <span>
-            {snapshot.isInitialPhase ? 'Faza początkowa' : 'Optymalizacja'}
-            {snapshot.isOptimal && ' — Rozwiązanie optymalne'}
+            {snapshot.isInitialPhase ? "Faza początkowa" : "Optymalizacja"}
+            {snapshot.isOptimal && " - Rozwiązanie optymalne"}
           </span>
           <span className="font-medium text-black text-[18px]">
             Zysk: <strong>{snapshot.totalProfit.toFixed(2)}</strong>

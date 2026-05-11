@@ -1,5 +1,5 @@
-import type { ProblemInput, IterationSnapshot, SolveResult } from './types';
-import { findCycle } from './cycleDetector';
+import type { ProblemInput, IterationSnapshot, SolveResult } from "./types";
+import { findCycle } from "./cycleDetector";
 
 const BLOCKED = -Infinity;
 const MAX_ITERATIONS = 100;
@@ -17,7 +17,10 @@ function buildProfitMatrix(input: ProblemInput): number[][] {
       if (blockedRoutes[i][j]) {
         z[i][j] = BLOCKED;
       } else {
-        z[i][j] = receivers[j].cenaSprzedazy - suppliers[i].kosztZakupu - transportCosts[i][j];
+        z[i][j] =
+          receivers[j].cenaSprzedazy -
+          suppliers[i].kosztZakupu -
+          transportCosts[i][j];
       }
     }
   }
@@ -34,7 +37,11 @@ interface BalancedProblem {
   fictitiousCols: boolean[];
 }
 
-function balance(profitMatrix: number[][], supply: number[], demand: number[]): BalancedProblem {
+function balance(
+  profitMatrix: number[][],
+  supply: number[],
+  demand: number[],
+): BalancedProblem {
   const totalSupply = supply.reduce((a, b) => a + b, 0);
   const totalDemand = demand.reduce((a, b) => a + b, 0);
 
@@ -45,13 +52,11 @@ function balance(profitMatrix: number[][], supply: number[], demand: number[]): 
   const fictitiousCols = d.map(() => false);
 
   if (totalSupply < totalDemand) {
-    // Add fictitious supplier (FD)
     const newRow = new Array(d.length).fill(0);
     z.push(newRow);
     s.push(totalDemand - totalSupply);
     fictitiousRows.push(true);
   } else if (totalSupply > totalDemand) {
-    // Add fictitious receiver (FO)
     for (const row of z) {
       row.push(0);
     }
@@ -78,7 +83,7 @@ function maximumElementMethod(bp: BalancedProblem): {
   const remainingSupply = [...bp.supply];
   const remainingDemand = [...bp.demand];
   const allocation: (number | null)[][] = Array.from({ length: rows }, () =>
-    new Array(cols).fill(null)
+    new Array(cols).fill(null),
   );
   const steps: IterationSnapshot[] = [];
   let stepCount = 0;
@@ -115,24 +120,23 @@ function maximumElementMethod(bp: BalancedProblem): {
     if (remainingSupply[r] === 0) eliminated.rows[r] = true;
     if (remainingDemand[c] === 0) eliminated.cols[c] = true;
 
-    // If both hit 0, keep one alive to avoid losing a basis variable
     if (remainingSupply[r] === 0 && remainingDemand[c] === 0) {
-      // Only eliminate one — prefer eliminating the row
       eliminated.cols[c] = false;
-      // The column stays for potential 0-allocation in next step
     }
 
-    steps.push(makeSnapshot({
-      step: stepCount++,
-      description: `Wybrano max z = ${maxVal} w komórce [${r + 1}, ${c + 1}], przydzielono ${qty}`,
-      profitMatrix: bp.profitMatrix,
-      allocation,
-      remainingSupply: [...remainingSupply],
-      remainingDemand: [...remainingDemand],
-      selectedCell: maxCell,
-      bp,
-      isInitialPhase: true,
-    }));
+    steps.push(
+      makeSnapshot({
+        step: stepCount++,
+        description: `Wybrano max z = ${maxVal} w komórce [${r + 1}, ${c + 1}], przydzielono ${qty}`,
+        profitMatrix: bp.profitMatrix,
+        allocation,
+        remainingSupply: [...remainingSupply],
+        remainingDemand: [...remainingDemand],
+        selectedCell: maxCell,
+        bp,
+        isInitialPhase: true,
+      }),
+    );
 
     const allRowsDone = eliminated.rows.every((e) => e);
     const allColsDone = eliminated.cols.every((e) => e);
@@ -145,7 +149,7 @@ function maximumElementMethod(bp: BalancedProblem): {
 function handleDegeneracy(
   allocation: (number | null)[][],
   rows: number,
-  cols: number
+  cols: number,
 ): void {
   const requiredBasic = rows + cols - 1;
   let basicCount = 0;
@@ -156,14 +160,12 @@ function handleDegeneracy(
   }
 
   while (basicCount < requiredBasic) {
-    // Add 0-allocation to a non-basic cell that doesn't create a cycle
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
         if (allocation[i][j] === null) {
           allocation[i][j] = 0;
           const cycle = findCycle([i, j], allocation, rows, cols);
           if (cycle && cycle.length > 2) {
-            // This creates a cycle with existing basic cells — undo
             allocation[i][j] = null;
             continue;
           }
@@ -180,12 +182,11 @@ function solveDualVariables(
   profitMatrix: number[][],
   allocation: (number | null)[][],
   rows: number,
-  cols: number
+  cols: number,
 ): { alpha: (number | null)[]; beta: (number | null)[] } {
   const alpha: (number | null)[] = new Array(rows).fill(null);
   const beta: (number | null)[] = new Array(cols).fill(null);
 
-  // Set α_0 = 0
   alpha[0] = 0;
 
   let changed = true;
@@ -218,10 +219,10 @@ function computeDeltas(
   alpha: (number | null)[],
   beta: (number | null)[],
   rows: number,
-  cols: number
+  cols: number,
 ): (number | null)[][] {
   const delta: (number | null)[][] = Array.from({ length: rows }, () =>
-    new Array(cols).fill(null)
+    new Array(cols).fill(null),
   );
 
   for (let i = 0; i < rows; i++) {
@@ -240,12 +241,16 @@ function computeTotalProfit(
   profitMatrix: number[][],
   allocation: (number | null)[][],
   rows: number,
-  cols: number
+  cols: number,
 ): number {
   let total = 0;
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      if (allocation[i][j] !== null && allocation[i][j]! > 0 && profitMatrix[i][j] !== BLOCKED) {
+      if (
+        allocation[i][j] !== null &&
+        allocation[i][j]! > 0 &&
+        profitMatrix[i][j] !== BLOCKED
+      ) {
         total += profitMatrix[i][j] * allocation[i][j]!;
       }
     }
@@ -267,7 +272,7 @@ interface SnapshotArgs {
   beta?: (number | null)[];
   delta?: (number | null)[][];
   cycleNodes?: [number, number][];
-  cycleSigns?: ('+' | '-')[];
+  cycleSigns?: ("+" | "-")[];
   isOptimal?: boolean;
 }
 
@@ -282,7 +287,9 @@ function makeSnapshot(args: SnapshotArgs): IterationSnapshot {
     remainingDemand: [...args.remainingDemand],
     alpha: args.alpha ? [...args.alpha] : new Array(rows).fill(null),
     beta: args.beta ? [...args.beta] : new Array(cols).fill(null),
-    delta: args.delta ? deepCopy2D(args.delta) : Array.from({ length: rows }, () => new Array(cols).fill(null)),
+    delta: args.delta
+      ? deepCopy2D(args.delta)
+      : Array.from({ length: rows }, () => new Array(cols).fill(null)),
     selectedCell: args.selectedCell,
     cycleNodes: args.cycleNodes ?? [],
     cycleSigns: args.cycleSigns ?? [],
@@ -290,7 +297,12 @@ function makeSnapshot(args: SnapshotArgs): IterationSnapshot {
       rows: [...args.bp.fictitiousRows],
       cols: [...args.bp.fictitiousCols],
     },
-    totalProfit: computeTotalProfit(args.profitMatrix, args.allocation, rows, cols),
+    totalProfit: computeTotalProfit(
+      args.profitMatrix,
+      args.allocation,
+      rows,
+      cols,
+    ),
     isOptimal: args.isOptimal ?? false,
     isInitialPhase: args.isInitialPhase,
   };
@@ -302,7 +314,7 @@ export function solve(input: ProblemInput): SolveResult {
     const bp = balance(
       rawProfit,
       input.suppliers.map((s) => s.podaz),
-      input.receivers.map((r) => r.popyt)
+      input.receivers.map((r) => r.popyt),
     );
 
     const { allocation, steps: initialSteps } = maximumElementMethod(bp);
@@ -314,10 +326,21 @@ export function solve(input: ProblemInput): SolveResult {
     let iterCount = initialSteps.length;
 
     for (let loop = 0; loop < MAX_ITERATIONS; loop++) {
-      const { alpha, beta } = solveDualVariables(bp.profitMatrix, allocation, rows, cols);
-      const delta = computeDeltas(bp.profitMatrix, allocation, alpha, beta, rows, cols);
+      const { alpha, beta } = solveDualVariables(
+        bp.profitMatrix,
+        allocation,
+        rows,
+        cols,
+      );
+      const delta = computeDeltas(
+        bp.profitMatrix,
+        allocation,
+        alpha,
+        beta,
+        rows,
+        cols,
+      );
 
-      // Find max positive delta
       let maxDelta = 0;
       let enteringCell: [number, number] | null = null;
       for (let i = 0; i < rows; i++) {
@@ -345,11 +368,10 @@ export function solve(input: ProblemInput): SolveResult {
       });
 
       if (!enteringCell) {
-        // Optimal solution found
         allIterations.push(
           makeSnapshot({
             step: iterCount++,
-            description: 'Rozwiązanie optymalne! Wszystkie Δ_ij ≤ 0.',
+            description: "Rozwiązanie optymalne! Wszystkie Δ_ij ≤ 0.",
             profitMatrix: bp.profitMatrix,
             allocation,
             remainingSupply: supply,
@@ -361,18 +383,18 @@ export function solve(input: ProblemInput): SolveResult {
             beta,
             delta,
             isOptimal: true,
-          })
+          }),
         );
         break;
       }
 
-      // Find cycle
       const cycle = findCycle(enteringCell, allocation, rows, cols);
       if (!cycle || cycle.length < 4) {
         allIterations.push(
           makeSnapshot({
             step: iterCount++,
-            description: 'Nie udało się znaleźć cyklu. Rozwiązanie może być zdegenerowane.',
+            description:
+              "Nie udało się znaleźć cyklu. Rozwiązanie może być zdegenerowane.",
             profitMatrix: bp.profitMatrix,
             allocation,
             remainingSupply: supply,
@@ -384,25 +406,24 @@ export function solve(input: ProblemInput): SolveResult {
             beta,
             delta,
             isOptimal: true,
-          })
+          }),
         );
         break;
       }
 
-      // Signs: entering cell gets +, then alternating -, +, -, ...
-      const signs: ('+' | '-')[] = cycle.map((_, idx) => (idx % 2 === 0 ? '+' : '-'));
+      const signs: ("+" | "-")[] = cycle.map((_, idx) =>
+        idx % 2 === 0 ? "+" : "-",
+      );
 
-      // Find theta = min allocation among - cells
       let theta = Infinity;
       for (let k = 0; k < cycle.length; k++) {
-        if (signs[k] === '-') {
+        if (signs[k] === "-") {
           const [cr, cc] = cycle[k];
           const val = allocation[cr][cc] ?? 0;
           if (val < theta) theta = val;
         }
       }
 
-      // Save snapshot before redistribution
       allIterations.push(
         makeSnapshot({
           step: iterCount++,
@@ -419,19 +440,17 @@ export function solve(input: ProblemInput): SolveResult {
           delta,
           cycleNodes: cycle,
           cycleSigns: signs,
-        })
+        }),
       );
 
-      // Apply redistribution
       for (let k = 0; k < cycle.length; k++) {
         const [cr, cc] = cycle[k];
         const current = allocation[cr][cc] ?? 0;
-        if (signs[k] === '+') {
+        if (signs[k] === "+") {
           allocation[cr][cc] = current + theta;
         } else {
           const newVal = current - theta;
           if (newVal === 0) {
-            // Remove from basis (but keep entering cell)
             if (k !== 0) {
               allocation[cr][cc] = null;
             } else {
@@ -443,11 +462,9 @@ export function solve(input: ProblemInput): SolveResult {
         }
       }
 
-      // Remove exactly one cell that became 0 with '-' sign (the leaving variable)
-      // Keep the entering cell even if it got 0
       let removed = false;
       for (let k = cycle.length - 1; k >= 1; k--) {
-        if (signs[k] === '-') {
+        if (signs[k] === "-") {
           const [cr, cc] = cycle[k];
           if (allocation[cr][cc] === 0 && !removed) {
             allocation[cr][cc] = null;
@@ -459,12 +476,11 @@ export function solve(input: ProblemInput): SolveResult {
       handleDegeneracy(allocation, rows, cols);
     }
 
-    // If we never added an optimal step, add one now
     const lastStep = allIterations[allIterations.length - 1];
     if (!lastStep.isOptimal && allIterations.length >= MAX_ITERATIONS) {
       return {
         iterations: allIterations,
-        error: 'Przekroczono maksymalną liczbę iteracji.',
+        error: "Przekroczono maksymalną liczbę iteracji.",
       };
     }
 

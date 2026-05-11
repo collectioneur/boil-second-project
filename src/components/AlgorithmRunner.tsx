@@ -16,14 +16,6 @@ export function AlgorithmRunner({ onSolve, disabled }: AlgorithmRunnerProps) {
       >
         Oblicz
       </button>
-      <button
-        onClick={onSolve}
-        disabled={disabled}
-        className="mt-4 text-[18px] text-black font-medium hover:opacity-60 transition-opacity
-          disabled:opacity-30 disabled:cursor-not-allowed"
-      >
-        Oblicz →
-      </button>
     </section>
   );
 }
