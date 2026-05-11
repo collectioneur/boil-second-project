@@ -27,16 +27,32 @@ function resize2D<T>(arr: T[][], rows: number, cols: number, fill: T): T[][] {
 
 const Divider = () => <div className="border-t border-black mx-16" />;
 
+const DEFAULT_M = 2;
+const DEFAULT_N = 3;
+const DEFAULT_SUPPLIERS: Supplier[] = [
+  { id: 0, podaz: 20, kosztZakupu: 7 },
+  { id: 1, podaz: 40, kosztZakupu: 8 },
+];
+const DEFAULT_RECEIVERS: Receiver[] = [
+  { id: 0, popyt: 16, cenaSprzedazy: 18 },
+  { id: 1, popyt: 12, cenaSprzedazy: 16 },
+  { id: 2, popyt: 24, cenaSprzedazy: 15 },
+];
+const DEFAULT_TRANSPORT_COSTS: number[][] = [
+  [4, 7, 2],
+  [8, 10, 4],
+];
+
 export default function App() {
-  const [m, setM] = useState(3);
-  const [n, setN] = useState(3);
-  const [suppliers, setSuppliers] = useState<Supplier[]>(() => createSuppliers(3, []));
-  const [receivers, setReceivers] = useState<Receiver[]>(() => createReceivers(3, []));
+  const [m, setM] = useState(DEFAULT_M);
+  const [n, setN] = useState(DEFAULT_N);
+  const [suppliers, setSuppliers] = useState<Supplier[]>(() => createSuppliers(DEFAULT_M, DEFAULT_SUPPLIERS));
+  const [receivers, setReceivers] = useState<Receiver[]>(() => createReceivers(DEFAULT_N, DEFAULT_RECEIVERS));
   const [transportCosts, setTransportCosts] = useState<number[][]>(() =>
-    resize2D([], 3, 3, 2)
+    resize2D(DEFAULT_TRANSPORT_COSTS, DEFAULT_M, DEFAULT_N, 0)
   );
   const [blockedRoutes, setBlockedRoutes] = useState<boolean[][]>(() =>
-    resize2D([], 3, 3, false)
+    resize2D([], DEFAULT_M, DEFAULT_N, false)
   );
   const [iterations, setIterations] = useState<IterationSnapshot[]>([]);
   const [currentStep, setCurrentStep] = useState(0);

@@ -25,6 +25,9 @@ export interface IterationSnapshot {
   cycleSigns: ('+' | '-')[];
   isFictitious: { rows: boolean[]; cols: boolean[] };
   totalProfit: number;
+  totalRevenue: number;
+  totalPurchaseCost: number;
+  totalTransportCost: number;
   isOptimal: boolean;
   isInitialPhase: boolean;
 }

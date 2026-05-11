@@ -51,17 +51,16 @@ function balance(
   const fictitiousRows = s.map(() => false);
   const fictitiousCols = d.map(() => false);
 
-  if (totalSupply < totalDemand) {
-    const newRow = new Array(d.length).fill(0);
-    z.push(newRow);
-    s.push(totalDemand - totalSupply);
-    fictitiousRows.push(true);
-  } else if (totalSupply > totalDemand) {
+  if (totalSupply !== totalDemand) {
     for (const row of z) {
       row.push(0);
     }
-    d.push(totalSupply - totalDemand);
+    d.push(totalSupply);
     fictitiousCols.push(true);
+
+    z.push(new Array(d.length).fill(0));
+    s.push(totalDemand);
+    fictitiousRows.push(true);
   }
 
   return {
@@ -75,7 +74,7 @@ function balance(
   };
 }
 
-function maximumElementMethod(bp: BalancedProblem): {
+function maximumElementMethod(bp: BalancedProblem, input: ProblemInput): {
   allocation: (number | null)[][];
   steps: IterationSnapshot[];
 } {
@@ -134,6 +133,7 @@ function maximumElementMethod(bp: BalancedProblem): {
         remainingDemand: [...remainingDemand],
         selectedCell: maxCell,
         bp,
+        input,
         isInitialPhase: true,
       }),
     );
@@ -237,13 +237,25 @@ function computeDeltas(
   return delta;
 }
 
-function computeTotalProfit(
+interface FinancialBreakdown {
+  totalProfit: number;
+  totalRevenue: number;
+  totalPurchaseCost: number;
+  totalTransportCost: number;
+}
+
+function computeFinancials(
   profitMatrix: number[][],
   allocation: (number | null)[][],
-  rows: number,
-  cols: number,
-): number {
-  let total = 0;
+  bp: BalancedProblem,
+  input: ProblemInput,
+): FinancialBreakdown {
+  const { rows, cols } = bp;
+  let totalProfit = 0;
+  let totalRevenue = 0;
+  let totalPurchaseCost = 0;
+  let totalTransportCost = 0;
+
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       if (
@@ -251,11 +263,19 @@ function computeTotalProfit(
         allocation[i][j]! > 0 &&
         profitMatrix[i][j] !== BLOCKED
       ) {
-        total += profitMatrix[i][j] * allocation[i][j]!;
+        totalProfit += profitMatrix[i][j] * allocation[i][j]!;
+
+        if (!bp.fictitiousRows[i] && !bp.fictitiousCols[j]) {
+          const qty = allocation[i][j]!;
+          totalRevenue += input.receivers[j].cenaSprzedazy * qty;
+          totalPurchaseCost += input.suppliers[i].kosztZakupu * qty;
+          totalTransportCost += input.transportCosts[i][j] * qty;
+        }
       }
     }
   }
-  return total;
+
+  return { totalProfit, totalRevenue, totalPurchaseCost, totalTransportCost };
 }
 
 interface SnapshotArgs {
@@ -267,6 +287,7 @@ interface SnapshotArgs {
   remainingDemand: number[];
   selectedCell: [number, number] | null;
   bp: BalancedProblem;
+  input: ProblemInput;
   isInitialPhase: boolean;
   alpha?: (number | null)[];
   beta?: (number | null)[];
@@ -278,6 +299,12 @@ interface SnapshotArgs {
 
 function makeSnapshot(args: SnapshotArgs): IterationSnapshot {
   const { rows, cols } = args.bp;
+  const financials = computeFinancials(
+    args.profitMatrix,
+    args.allocation,
+    args.bp,
+    args.input,
+  );
   return {
     step: args.step,
     description: args.description,
@@ -297,12 +324,7 @@ function makeSnapshot(args: SnapshotArgs): IterationSnapshot {
       rows: [...args.bp.fictitiousRows],
       cols: [...args.bp.fictitiousCols],
     },
-    totalProfit: computeTotalProfit(
-      args.profitMatrix,
-      args.allocation,
-      rows,
-      cols,
-    ),
+    ...financials,
     isOptimal: args.isOptimal ?? false,
     isInitialPhase: args.isInitialPhase,
   };
@@ -317,7 +339,7 @@ export function solve(input: ProblemInput): SolveResult {
       input.receivers.map((r) => r.popyt),
     );
 
-    const { allocation, steps: initialSteps } = maximumElementMethod(bp);
+    const { allocation, steps: initialSteps } = maximumElementMethod(bp, input);
     const { rows, cols } = bp;
 
     handleDegeneracy(allocation, rows, cols);
@@ -378,6 +400,7 @@ export function solve(input: ProblemInput): SolveResult {
             remainingDemand: demand,
             selectedCell: null,
             bp,
+            input,
             isInitialPhase: false,
             alpha,
             beta,
@@ -401,6 +424,7 @@ export function solve(input: ProblemInput): SolveResult {
             remainingDemand: demand,
             selectedCell: enteringCell,
             bp,
+            input,
             isInitialPhase: false,
             alpha,
             beta,
@@ -434,6 +458,7 @@ export function solve(input: ProblemInput): SolveResult {
           remainingDemand: demand,
           selectedCell: enteringCell,
           bp,
+          input,
           isInitialPhase: false,
           alpha,
           beta,

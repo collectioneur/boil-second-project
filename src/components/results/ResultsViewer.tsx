@@ -45,6 +45,30 @@ export function ResultsViewer({
         </div>
       </div>
 
+      {snapshot.isOptimal && (
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="border border-black/10 px-4 py-3">
+            <p className="text-[12px] text-black/40 mb-1">Przychód całkowity</p>
+            <p className="text-[20px] font-bold">{snapshot.totalRevenue.toFixed(2)}</p>
+          </div>
+          <div className="border border-black/10 px-4 py-3">
+            <p className="text-[12px] text-black/40 mb-1">Koszt zakupu</p>
+            <p className="text-[20px] font-bold">{snapshot.totalPurchaseCost.toFixed(2)}</p>
+          </div>
+          <div className="border border-black/10 px-4 py-3">
+            <p className="text-[12px] text-black/40 mb-1">Koszt transportu</p>
+            <p className="text-[20px] font-bold">{snapshot.totalTransportCost.toFixed(2)}</p>
+          </div>
+          <div className="border border-black/10 px-4 py-3">
+            <p className="text-[12px] text-black/40 mb-1">Zysk całkowity</p>
+            <p className="text-[20px] font-bold">{snapshot.totalProfit.toFixed(2)}</p>
+          </div>
+          <p className="col-span-4 text-[12px] text-black/30">
+            {snapshot.totalRevenue.toFixed(2)} − {snapshot.totalPurchaseCost.toFixed(2)} − {snapshot.totalTransportCost.toFixed(2)} = {snapshot.totalProfit.toFixed(2)}
+          </p>
+        </div>
+      )}
+
       <IterationControls
         currentStep={currentStep}
         totalSteps={iterations.length}
